@@ -1,0 +1,33 @@
+include <stdlib.h>
+
+int* global_nums;
+
+int compare(const void* a, const void* b) {
+    int idxA = *(int*)a;
+    int idxB = *(int*)b;
+    if (global_nums[idxA] < global_nums[idxB]) return -1;
+    if (global_nums[idxA] > global_nums[idxB]) return 1;
+    return 0;
+}
+
+long long countOperationsToEmptyArray(int* nums, int numsSize) {
+    global_nums = nums;
+    
+    int* indices = (int*)malloc(numsSize * sizeof(int));
+    for (int i = 0; i < numsSize; i++) {
+        indices[i] = i;
+    }
+    
+    qsort(indices, numsSize, sizeof(int), compare);
+    
+    long long total_operations = numsSize;
+    
+    for (int i = 1; i < numsSize; i++) {
+        if (indices[i] < indices[i - 1]) {
+            total_operations += (numsSize - i);
+        }
+    }
+    
+    free(indices);
+    return total_operations;
+}
