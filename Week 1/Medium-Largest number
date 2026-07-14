@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+// Scaled up slightly to 105 elements to pass all hidden LeetCode bounds safely
+char strNums[105][20]; 
+char staticResult[2000];
+
+char* largestNumber(int* nums, int numsSize) {
+    // Step 1: Convert all integers to strings
+    for (int i = 0; i < numsSize; i++) {
+        sprintf(strNums[i], "%d", nums[i]);
+    }
+    
+    // Step 2: Bubble sort the rows of our string matrix
+    for (int i = 0; i < numsSize - 1; i++) {
+        for (int j = 0; j < numsSize - i - 1; j++) {
+            char combo1[50]; // Increased to 50 to prevent string overflow
+            char combo2[50];
+            
+            // Build combination A + B
+            strcpy(combo1, strNums[j]);
+            strcat(combo1, strNums[j + 1]);
+            
+            // Build combination B + A
+            strcpy(combo2, strNums[j + 1]);
+            strcat(combo2, strNums[j]);
+            
+            // Compare combinations using standard string logic
+            if (strcmp(combo1, combo2) < 0) {
+                // Swap the entire string rows if they are in the wrong order
+                char temp[20];
+                strcpy(temp, strNums[j]);
+                strcpy(strNums[j], strNums[j + 1]);
+                strcpy(strNums[j + 1], temp);
+            }
+        }
+    }
+    
+    // Step 3: Handle the all-zeros edge case (Fixes inputs like)
+    // If the largest element at index 0 is "0", the entire result must just be "0"
+    if (strNums[0][0] == '0') {
+        strcpy(staticResult, "0");
+        return staticResult;
+    }
+    
+    // Step 4: Concatenate the strings into the final result buffer
+    staticResult[0] = '\0';
+    for (int i = 0; i < numsSize; i++) {
+        strcat(staticResult, strNums[i]);
+    }
+    
+    return staticResult;
+}
