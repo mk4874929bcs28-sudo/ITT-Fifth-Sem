@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+bool isWordInDict(char* target, char** words, int wordsSize) {
+    for (int i = 0; i < wordsSize; i++) {
+        if (strcmp(target, words[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool canBreak(char* word, char** words, int wordsSize, int totalPieces) {
+    int len = strlen(word);
+    
+    if (len == 0) {
+        return totalPieces >= 2;
+    }
+
+    char prefix[1001]; 
+
+    for (int i = 1; i <= len; i++) {
+        strncpy(prefix, word, i);
+        prefix[i] = '\0'; 
+
+        if (isWordInDict(prefix, words, wordsSize)) {
+            char* suffix = word + i;
+            if (canBreak(suffix, words, wordsSize, totalPieces + 1)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+char** findAllConcatenatedWordsInADict(char** words, int wordsSize, int* returnSize) {
+    char** result = (char**)malloc(wordsSize * sizeof(char*));
+    *returnSize = 0;
+
+    for (int i = 0; i < wordsSize; i++) {
+        if (strlen(words[i]) > 0 && canBreak(words[i], words, wordsSize, 0)) {
+            result[*returnSize] = words[i];
+            (*returnSize)++;
+        }
+    }
+
+    return result;
+}
