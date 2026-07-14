@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+// Helper function: Counts how many elements are <= target
+int countLessOrEqual(int** matrix, int n, int target) {
+    int count = 0;
+    int row = n - 1; // Start at the bottom-left corner
+    int col = 0;
+    
+    while (row >= 0 && col < n) {
+        if (matrix[row][col] <= target) {
+            count += (row + 1); // Add current element and all elements above it
+            col++;              // Step Right
+        } else {
+            row--;              // Step Up
+        }
+    }
+    return count;
+}
+
+// LeetCode's exact function signature
+int kthSmallest(int** matrix, int matrixSize, int* matrixColSize, int k) {
+    // The range of possible answers spans from the absolute min to absolute max
+    int low = matrix[0][0];
+    int high = matrix[matrixSize - 1][matrixSize - 1];
+    int ans = 0;
+    
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        
+        // Check our guess against our staircase counter
+        if (countLessOrEqual(matrix, matrixSize, mid) >= k) {
+            ans = mid;        // Save mid as a valid answer candidate
+            high = mid - 1;   // Try to find a smaller valid number on the left
+        } else {
+            low = mid + 1;    // The guess was too small, search the right side
+        }
+    }
+    
+    return ans;
+}
