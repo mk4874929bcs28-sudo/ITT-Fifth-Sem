@@ -1,0 +1,25 @@
+void sortColors(int* nums, int numsSize) {
+    int low = 0;              // Boundary tracking where the next 0 should go
+    int mid = 0;              // Our active reading pointer
+    int high = numsSize - 1;  // Boundary tracking where the next 2 should go
+    while (mid <= high) {
+        if (nums[mid] == 0) {
+            // Swap mid with low to move the 0 to the left boundary
+            int temp = nums[mid];
+            nums[mid] = nums[low];
+            nums[low] = temp;
+            low++;
+            mid++;
+        } 
+        else if (nums[mid] == 1) {
+            // 1 is already in its correct middle zone, just advance
+            mid++;
+        } 
+        else if (nums[mid] == 2) {
+            int temp = nums[mid];
+            nums[mid] = nums[high];
+            nums[high] = temp;
+            high--;
+        }
+    }
+}
