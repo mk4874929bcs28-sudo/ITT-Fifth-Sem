@@ -1,0 +1,41 @@
+class Solution {
+    public int[] numSmallerByFrequency(String[] queries, String[] words) {
+        int[] freqCount = new int[12];
+        
+        for (String word : words) {
+            int f = getSmallestCharFrequency(word);
+            freqCount[f]++;
+        }
+        
+        int[] suffixSum = new int[12];
+        int currentSum = 0;
+        for (int i = 11; i >= 0; i--) {
+            currentSum += freqCount[i];
+            suffixSum[i] = currentSum;
+        }
+        
+        int[] answer = new int[queries.length];
+        for (int i = 0; i < queries.length; i++) {
+            int qFreq = getSmallestCharFrequency(queries[i]);
+            answer[i] = suffixSum[qFreq + 1];
+        }
+        
+        return answer;
+    }
+    
+    private int getSmallestCharFrequency(String s) {
+        char smallest = 'z' + 1;
+        int count = 0;
+        
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c < smallest) {
+                smallest = c;
+                count = 1;
+            } else if (c == smallest) {
+                count++;
+            }
+        }
+        return count;
+    }
+}
