@@ -1,50 +1,43 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-
-bool isWordInDict(char* target, char** words, int wordsSize) {
-    for (int i = 0; i < wordsSize; i++) {
-        if (strcmp(target, words[i]) == 0) {
-            return true;
+class Solution {
+    public java.util.List<String> findAllConcatenatedWordsInADict(String[] words) {
+        java.util.List<String> result = new java.util.ArrayList<>();
+        java.util.Set<String> wordSet = new java.util.HashSet<>();
+        
+        java.util.Arrays.sort(words, (a, b) -> Integer.compare(a.length(), b.length()));
+        
+        java.util.Map<String, Boolean> memo = new java.util.HashMap<>();
+        
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+            
+            memo.clear();
+            
+            if (canForm(word, wordSet, memo)) {
+                result.add(word);
+            }
+            wordSet.add(word);
         }
+        
+        return result;
     }
-    return false;
-}
-
-bool canBreak(char* word, char** words, int wordsSize, int totalPieces) {
-    int len = strlen(word);
     
-    if (len == 0) {
-        return totalPieces >= 2;
-    }
-
-    char prefix[1001]; 
-
-    for (int i = 1; i <= len; i++) {
-        strncpy(prefix, word, i);
-        prefix[i] = '\0'; 
-
-        if (isWordInDict(prefix, words, wordsSize)) {
-            char* suffix = word + i;
-            if (canBreak(suffix, words, wordsSize, totalPieces + 1)) {
-                return true;
+    private boolean canForm(String word, java.util.Set<String> wordSet, java.util.Map<String, Boolean> memo) {
+        if (wordSet.contains(word)) return true;
+        if (memo.containsKey(word)) return memo.get(word);
+        
+        for (int i = 1; i < word.length(); i++) {
+            String prefix = word.substring(0, i);
+            
+            if (wordSet.contains(prefix)) {
+                String suffix = word.substring(i);
+                if (canForm(suffix, wordSet, memo)) {
+                    memo.put(word, true);
+                    return true;
+                }
             }
         }
+        
+        memo.put(word, false);
+        return false;
     }
-    return false;
-}
-
-char** findAllConcatenatedWordsInADict(char** words, int wordsSize, int* returnSize) {
-    char** result = (char**)malloc(wordsSize * sizeof(char*));
-    *returnSize = 0;
-
-    for (int i = 0; i < wordsSize; i++) {
-        if (strlen(words[i]) > 0 && canBreak(words[i], words, wordsSize, 0)) {
-            result[*returnSize] = words[i];
-            (*returnSize)++;
-        }
-    }
-
-    return result;
 }
