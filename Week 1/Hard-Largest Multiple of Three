@@ -1,0 +1,44 @@
+class Solution {
+    public String largestMultipleOfThree(int[] digits) {
+        int[] count = new int[10];
+        int sum = 0;
+        
+        for (int d : digits) {
+            count[d]++;
+            sum += d;
+        }
+        
+        int[] mod1 = {1, 4, 7, 2, 5, 8};
+        int[] mod2 = {2, 5, 8, 1, 4, 7};
+        
+        while (sum % 3 != 0) {
+            int[] targetGroup = (sum % 3 == 1) ? mod1 : mod2;
+            boolean deleted = false;
+            
+            for (int d : targetGroup) {
+                if (count[d] > 0) {
+                    count[d]--;
+                    sum -= d;
+                    deleted = true;
+                    break;
+                }
+            }
+            if (!deleted) return "";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 9; i >= 0; i--) {
+            while (count[i] > 0) {
+                sb.append(i);
+                count[i]--;
+            }
+        }
+        
+        String result = sb.toString();
+        if (result.length() > 0 && result.charAt(0) == '0') {
+            return "0";
+        }
+        
+        return result;
+    }
+}
