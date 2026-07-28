@@ -1,0 +1,62 @@
+class Solution {
+    public int[] maxNumber(int[] nums1, int[] nums2, int k) {
+        int m = nums1.length;
+        int n = nums2.length;
+        int[] maxResult = new int[k];
+        
+        int start = Math.max(0, k - n);
+        int end = Math.min(k, m);
+        
+        for (int i = start; i <= end; i++) {
+            int[] sub1 = maxSubarray(nums1, i);
+            int[] sub2 = maxSubarray(nums2, k - i);
+            int[] merged = merge(sub1, sub2, k);
+            
+            if (greater(merged, 0, maxResult, 0)) {
+                maxResult = merged;
+            }
+        }
+        
+        return maxResult;
+    }
+    
+    private int[] maxSubarray(int[] nums, int k) {
+        int[] result = new int[k];
+        int len = 0;
+        int n = nums.length;
+        
+        for (int i = 0; i < n; i++) {
+            while (len > 0 && result[len - 1] < nums[i] && (n - i) > (k - len)) {
+                len--;
+            }
+            if (len < k) {
+                result[len++] = nums[i];
+            }
+        }
+        return result;
+    }
+    
+    private int[] merge(int[] nums1, int[] nums2, int k) {
+        int[] result = new int[k];
+        int i = 0, j = 0;
+        
+        for (int r = 0; r < k; r++) {
+            if (greater(nums1, i, nums2, j)) {
+                result[r] = nums1[i++];
+            } else {
+                result[r] = nums2[j++];
+            }
+        }
+        return result;
+    }
+    
+    private boolean greater(int[] nums1, int i, int[] nums2, int j) {
+        while (i < nums1.length && j < nums2.length && nums1[i] == nums2[j]) {
+            i++;
+            j++;
+        }
+        if (j == nums2.length) return true;
+        if (i == nums1.length) return false;
+        return nums1[i] > nums2[j];
+    }
+}
