@@ -1,0 +1,57 @@
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int minStickers(String[] stickers, String target) {
+        int n = stickers.length;
+        int[][] stickerCounts = new int[n][26];
+        for (int i = 0; i < n; i++) {
+            for (char c : stickers[i].toCharArray()) {
+                stickerCounts[i][c - 'a']++;
+            }
+        }
+        
+        Map<String, Integer> memo = new HashMap<>();
+        memo.put("", 0);
+        
+        return helper(stickerCounts, target, memo);
+    }
+    
+    private int helper(int[][] stickerCounts, String target, Map<String, Integer> memo) {
+        if (memo.containsKey(target)) {
+            return memo.get(target);
+        }
+        
+        int[] targetCount = new int[26];
+        for (char c : target.toCharArray()) {
+            targetCount[c - 'a']++;
+        }
+        
+        int minStickers = Integer.MAX_VALUE;
+        
+        for (int[] sticker : stickerCounts) {
+            if (sticker[target.charAt(0) - 'a'] == 0) {
+                continue;
+            }
+            
+            StringBuilder remainingTarget = new StringBuilder();
+            for (int i = 0; i < 26; i++) {
+                if (targetCount[i] > 0) {
+                    int remainingCount = Math.max(0, targetCount[i] - sticker[i]);
+                    for (int j = 0; j < remainingCount; j++) {
+                        remainingTarget.append((char) ('a' + i));
+                    }
+                }
+            }
+            
+            int result = helper(stickerCounts, remainingTarget.toString(), memo);
+            if (result != -1) {
+                minStickers = Math.min(minStickers, 1 + result);
+            }
+        }
+        
+        memo.put(target, minStickers == Integer.MAX_VALUE ? -1 : minStickers);
+        return memo.get(target);
+    }
+}
