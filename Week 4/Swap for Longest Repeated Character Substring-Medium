@@ -1,0 +1,41 @@
+class Solution {
+    public int maxRepOpt1(String text) {
+        int[] totalCount = new int[26];
+        for (char c : text.toCharArray()) {
+            totalCount[c - 'a']++;
+        }
+        
+        int n = text.length();
+        int maxLength = 0;
+        int i = 0;
+        
+        while (i < n) {
+            char currChar = text.charAt(i);
+            int j = i;
+            
+            while (j < n && text.charAt(j) == currChar) {
+                j++;
+            }
+            
+            int len1 = j - i;
+            int k = j + 1;
+            
+            while (k < n && text.charAt(k) == currChar) {
+                k++;
+            }
+            
+            int len2 = k - (j + 1);
+            int combinedLen = len1 + len2;
+            
+            if (combinedLen < totalCount[currChar - 'a']) {
+                maxLength = Math.max(maxLength, combinedLen + 1);
+            } else {
+                maxLength = Math.max(maxLength, combinedLen);
+            }
+            
+            i = j;
+        }
+        
+        return maxLength;
+    }
+}
