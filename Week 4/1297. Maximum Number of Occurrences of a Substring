@@ -1,0 +1,38 @@
+import java.util.HashMap;
+import java.util.Map;
+
+class Solution {
+    public int maxFreq(String s, int maxLetters, int minSize, int maxSize) {
+        Map<String, Integer> counts = new HashMap<>();
+        int maxOccurrence = 0;
+
+        for (int i = 0; i <= s.length() - minSize; i++) {
+            String sub = s.substring(i, i + minSize);
+            if (isValid(sub, maxLetters)) {
+                int freq = counts.getOrDefault(sub, 0) + 1;
+                counts.put(sub, freq);
+                if (freq > maxOccurrence) {
+                    maxOccurrence = freq;
+                }
+            }
+        }
+
+        return maxOccurrence;
+    }
+
+    private boolean isValid(String sub, int maxLetters) {
+        int uniqueCount = 0;
+        boolean[] seen = new boolean[26];
+        for (int i = 0; i < sub.length(); i++) {
+            int idx = sub.charAt(i) - 'a';
+            if (!seen[idx]) {
+                seen[idx] = true;
+                uniqueCount++;
+                if (uniqueCount > maxLetters) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+}
