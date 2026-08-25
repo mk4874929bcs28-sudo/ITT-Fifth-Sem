@@ -1,0 +1,35 @@
+import java.util.Arrays;
+
+class Solution {
+    public int triangleNumber(int[] nums) {
+        int count = 0;
+        int n = nums.length;
+        
+        // Step 1: Sort the array to ensure a <= b <= c
+        Arrays.sort(nums);
+        
+        // Step 2: Fix the longest side 'c' from right to left
+        for (int i = n - 1; i >= 2; i--) {
+            int left = 0;       // Pointer for shortest side 'a'
+            int right = i - 1;  // Pointer for middle side 'b'
+            
+            while (left < right) {
+                // Check if a + b > c
+                if (nums[left] + nums[right] > nums[i]) {
+                    // If nums[left] + nums[right] > nums[i], then any element 
+                    // from index 'left' up to 'right-1' added to nums[right] 
+                    // will also be greater than nums[i].
+                    count += (right - left);
+                    
+                    // Move the right pointer leftward to try a smaller middle side
+                    right--;
+                } else {
+                    // The sum is too small; we need a larger shortest side
+                    left++;
+                }
+            }
+        }
+        
+        return count;
+    }
+}
