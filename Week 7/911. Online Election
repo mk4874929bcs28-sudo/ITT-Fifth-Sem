@@ -1,0 +1,64 @@
+#include <stdlib.h>
+
+typedef struct {
+    int* times;      // Array tracking the timestamp of each vote
+    int* leaders;    // Array tracking who the leader was at that timestamp
+    int size;        // Total number of votes
+} TopVotedCandidate;
+
+TopVotedCandidate* topVotedCandidateCreate(int* persons, int personsSize, int* times, int timesSize) {
+    TopVotedCandidate* obj = (TopVotedCandidate*)malloc(sizeof(TopVotedCandidate));
+    obj->times = (int*)malloc(timesSize * sizeof(int));
+    obj->leaders = (int*)malloc(timesSize * sizeof(int));
+    obj->size = timesSize;
+
+    // Dynamically track candidate vote frequencies. 
+    // The maximum possible candidate ID is equal to the total number of votes cast.
+    int* voteCounts = (int*)calloc(personsSize + 1, sizeof(int));
+    
+    int currentLeader = -1;
+    int maxVotes = 0;
+
+    for (int i = 0; i < timesSize; i++) {
+        obj->times[i] = times[i];
+        int p = persons[i];
+        voteCounts[p]++;
+
+        // Update leader if candidate matches or exceeds the current maximum votes
+        if (voteCounts[p] >= maxVotes) {
+            maxVotes = voteCounts[p];
+            currentLeader = p;
+        }
+        obj->leaders[i] = currentLeader;
+    }
+
+    free(voteCounts);
+    return obj;
+}
+
+int topVotedCandidateQ(TopVotedCandidate* obj, int t) {
+    int low = 0;
+    int high = obj->size - 1;
+    int bestIdx = 0;
+
+    // Binary search to find the largest timestamp <= t
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        if (obj->times[mid] <= t) {
+            bestIdx = mid;   // This time is valid, save it as a candidate
+            low = mid + 1;   // Look for an even closer time on the right side
+        } else {
+            high = mid - 1;  // Too far in the future, narrow search to the left
+        }
+    }
+
+    return obj->leaders[bestIdx];
+}
+
+void topVotedCandidateFree(TopVotedCandidate* obj) {
+    if (obj) {
+        free(obj->times);
+        free(obj->leaders);
+        free(obj);
+    }
+}
