@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+char* decodeString(char* s) {
+    int len = strlen(s);
+    int max_res_len = 100000; 
+    
+    char* res = (char*)malloc(max_res_len * sizeof(char));
+    res[0] = '\0';
+    int res_ptr = 0;
+    
+    int* countStack = (int*)malloc(len * sizeof(int));
+    int countTop = -1;
+    
+    char** stringStack = (char**)malloc(len * sizeof(char*));
+    int stringTop = -1;
+    
+    int i = 0;
+    while (s[i] != '\0') {
+        if (isdigit(s[i])) {
+            int num = 0;
+            while (isdigit(s[i])) {
+                num = num * 10 + (s[i] - '0');
+                i++;
+            }
+            countStack[++countTop] = num;
+        } else if (s[i] == '[') {
+            char* saved_str = (char*)malloc((res_ptr + 1) * sizeof(char));
+            strcpy(saved_str, res);
+            stringStack[++stringTop] = saved_str;
+            
+            res[0] = '\0';
+            res_ptr = 0;
+            i++;
+        } else if (s[i] == ']') {
+            int repeat = countStack[countTop--];
+            char* prev_str = stringStack[stringTop--];
+            
+            char* repeated_str = (char*)malloc((res_ptr * repeat + 1) * sizeof(char));
+            repeated_str[0] = '\0';
+            for (int k = 0; k < repeat; k++) {
+                strcat(repeated_str, res);
+            }
+            
+            int prev_len = strlen(prev_str);
+            int rep_len = strlen(repeated_str);
+            
+            strcpy(res, prev_str);
+            strcat(res, repeated_str);
+            res_ptr = prev_len + rep_len;
+            
+            free(prev_str);
+            free(repeated_str);
+            i++;
+        } else {
+            res[res_ptr++] = s[i];
+            res[res_ptr] = '\0';
+            i++;
+        }
+    }
+    
+    free(countStack);
+    free(stringStack);
+    
+    return res;
+}
