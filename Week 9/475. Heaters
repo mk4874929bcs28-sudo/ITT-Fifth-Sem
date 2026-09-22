@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <limits.h>
+
+int compare(const void *a, const void *b) {
+    long long diff = (long long)(*(int*)a) - (long long)(*(int*)b);
+    return (diff > 0) - (diff < 0);
+}
+
+int findRadius(int* houses, int housesSize, int* heaters, int heatersSize) {
+    qsort(heaters, heatersSize, sizeof(int), compare);
+    
+    int max_radius = 0;
+    
+    for (int i = 0; i < housesSize; i++) {
+        int house = houses[i];
+        int low = 0, high = heatersSize - 1;
+        int idx = heatersSize; 
+        
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (heaters[mid] >= house) {
+                idx = mid;
+                high = mid - 1; 
+            } else {
+                low = mid + 1;
+            }
+        }
+        
+        int dist_right = (idx < heatersSize) ? (heaters[idx] - house) : INT_MAX;
+        int dist_left = (idx > 0) ? (house - heaters[idx - 1]) : INT_MAX;
+        int current_house_radius = (dist_left < dist_right) ? dist_left : dist_right;
+        
+        if (current_house_radius > max_radius) {
+            max_radius = current_house_radius;
+        }
+    }
+    
+    return max_radius;
+}
