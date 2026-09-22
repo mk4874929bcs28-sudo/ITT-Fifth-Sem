@@ -1,0 +1,62 @@
+// Remove or comment out the struct definition. LeetCode handles it automatically.
+
+struct ListNode* split(struct ListNode* head, int step) {
+    if (!head) return NULL;
+    
+    for (int i = 1; head->next && i < step; i++) {
+        head = head->next;
+    }
+    
+    struct ListNode* rest = head->next;
+    head->next = NULL; 
+    return rest;
+}
+
+struct ListNode* merge(struct ListNode* l1, struct ListNode* l2, struct ListNode* head) {
+    struct ListNode* cur = head;
+    while (l1 && l2) {
+        if (l1->val < l2->val) {
+            cur->next = l1;
+            l1 = l1->next;
+        } else {
+            cur->next = l2;
+            l2 = l2->next;
+        }
+        cur = cur->next;
+    }
+    
+    cur->next = l1 ? l1 : l2;
+    while (cur->next) {
+        cur = cur->next;
+    }
+    return cur;
+}
+
+struct ListNode* sortList(struct ListNode* head) {
+    if (!head || !head->next) return head;
+    
+    int length = 0;
+    struct ListNode* cur = head;
+    while (cur) {
+        length++;
+        cur = cur->next;
+    }
+    
+    struct ListNode dummy;
+    dummy.next = head;
+    
+    for (int step = 1; step < length; step <<= 1) {
+        struct ListNode* prev = &dummy;
+        cur = dummy.next;
+        
+        while (cur) {
+            struct ListNode* l1 = cur;
+            struct ListNode* l2 = split(l1, step);
+            cur = split(l2, step);
+            
+            prev = merge(l1, l2, prev);
+        }
+    }
+    
+    return dummy.next;
+}
