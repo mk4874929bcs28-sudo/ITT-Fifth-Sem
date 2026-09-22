@@ -1,0 +1,30 @@
+#include <stdlib.h>
+
+int** findSolution(int (*customFunction)(int, int), int z, int* returnSize, int** returnColumnSizes) {
+    int max_capacity = 2000;
+    int** result = (int**)malloc(max_capacity * sizeof(int*));
+    *returnColumnSizes = (int*)malloc(max_capacity * sizeof(int));
+    *returnSize = 0;
+    
+    int x = 1;
+    int y = 1000;
+    
+    while (x <= 1000 && y >= 1) {
+        int val = customFunction(x, y);
+        if (val == z) {
+            result[*returnSize] = (int*)malloc(2 * sizeof(int));
+            result[*returnSize][0] = x;
+            result[*returnSize][1] = y;
+            (*returnColumnSizes)[*returnSize] = 2;
+            (*returnSize)++;
+            x++;
+            y--;
+        } else if (val < z) {
+            x++;
+        } else {
+            y--;
+        }
+    }
+    
+    return result;
+}
