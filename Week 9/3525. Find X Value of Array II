@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void build(int cur, int left, int right, int* nums, int k, int* tree_prod, int* tree_remain) {
+    if (left == right) {
+        tree_prod[cur] = nums[left] % k;
+        tree_remain[cur * k + (nums[left] % k)] = 1;
+        return;
+    }
+    int mid = left + (right - left) / 2;
+    build(2 * cur + 1, left, mid, nums, k, tree_prod, tree_remain);
+    build(2 * cur + 2, mid + 1, right, nums, k, tree_prod, tree_remain);
+    
+    int left_child = 2 * cur + 1;
+    int right_child = 2 * cur + 2;
+    tree_prod[cur] = (tree_prod[left_child] * tree_prod[right_child]) % k;
+    
+    for (int i = 0; i < k; ++i) {
+        tree_remain[cur * k + i] = tree_remain[left_child * k + i];
+    }
+    for (int i = 0; i < k; ++i) {
+        int target = (i * tree_prod[left_child]) % k;
+        tree_remain[cur * k + target] += tree_remain[right_child * k + i];
+    }
+}
+
+void update(int cur, int lo, int hi, int idx, int val, int k, int* tree_prod, int* tree_remain) {
+    if (lo == hi) {
+        for (int j = 0; j < k; ++j) {
+            tree_remain[cur * k + j] = 0;
+        }
+        tree_prod[cur] = val % k;
+        tree_remain[cur * k + (val % k)] = 1;
+        return;
+    }
+    int mid = lo + (hi - lo) / 2;
+    if (idx <= mid) {
+        update(2 * cur + 1, lo, mid, idx, val, k, tree_prod, tree_remain);
+    } else {
+        update(2 * cur + 2, mid + 1, hi, idx, val, k, tree_prod, tree_remain);
+    }
+    
+    int left_child = 2 * cur + 1;
+    int right_child = 2 * cur + 2;
+    tree_prod[cur] = (tree_prod[left_child] * tree_prod[right_child]) % k;
+    
+    for (int i = 0; i < k; ++i) {
+        tree_remain[cur * k + i] = tree_remain[left_child * k + i];
+    }
+    for (int i = 0; i < k; ++i) {
+        int target = (i * tree_prod[left_child]) % k;
+        tree_remain[cur * k + target] += tree_remain[right_child * k + i];
+    }
+}
+
+void collect_query(int cur, int lo, int hi, int i, int j, int k, int* tree_prod, int* tree_remain, int* res_prod, int* res_remain, int* is_first, int* temp_remain) {
+    if (i <= lo && hi <= j) {
+        if (*is_first) {
+            *res_prod = tree_prod[cur];
+            for (int m = 0; m < k; m++) {
+                res_remain[m] = tree_remain[cur * k + m];
+            }
+            *is_first = 0;
+        } else {
+            for (int m = 0; m < k; m++) {
+                temp_remain[m] = res_remain[m];
+            }
+            for (int m = 0; m < k; m++) {
+                int target = (m * (*res_prod)) % k;
+                temp_remain[target] += tree_remain[cur * k + m];
+            }
+            *res_prod = ((*res_prod) * tree_prod[cur]) % k;
+            for (int m = 0; m < k; m++) {
+                res_remain[m] = temp_remain[m];
+            }
+        }
+        return;
+    }
+    int mid = lo + (hi - lo) / 2;
+    if (i <= mid) {
+        collect_query(2 * cur + 1, lo, mid, i, j, k, tree_prod, tree_remain, res_prod, res_remain, is_first, temp_remain);
+    }
+    if (j > mid) {
+        collect_query(2 * cur + 2, mid + 1, hi, i, j, k, tree_prod, tree_remain, res_prod, res_remain, is_first, temp_remain);
+    }
+}
+
+int* resultArray(int* nums, int numsSize, int k, int** queries, int queriesSize, int* queriesColSize, int* returnSize) {
+    int n = numsSize;
+    int* tree_prod = (int*)malloc(4 * n * sizeof(int));
+    int* tree_remain = (int*)calloc(4 * n * k, sizeof(int));
+    
+    build(0, 0, n - 1, nums, k, tree_prod, tree_remain);
+    
+    int* ans = (int*)malloc(queriesSize * sizeof(int));
+    *returnSize = queriesSize;
+    
+    int* res_remain = (int*)malloc(k * sizeof(int));
+    int* temp_remain = (int*)malloc(k * sizeof(int));
+    
+    for (int i = 0; i < queriesSize; i++) {
+        int idx = queries[i][0];
+        int val = queries[i][1];
+        int start = queries[i][2];
+        int x = queries[i][3];
+        
+        update(0, 0, n - 1, idx, val, k, tree_prod, tree_remain);
+        
+        int res_prod = 1;
+        int is_first = 1;
+        for (int m = 0; m < k; m++) res_remain[m] = 0;
+        
+        collect_query(0, 0, n - 1, start, n - 1, k, tree_prod, tree_remain, &res_prod, res_remain, &is_first, temp_remain);
+        
+        ans[i] = res_remain[x];
+    }
+    
+    free(tree_prod);
+    free(tree_remain);
+    free(res_remain);
+    free(temp_remain);
+    
+    return ans;
+}
